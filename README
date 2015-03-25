@@ -1,0 +1,19 @@
+SwitchMask
+==========
+
+Manage your identity.
+
+Why?
+----
+
+I'm lazy. I like roleplaying on the DarkMyst IRC network, but I don't like
+changing my nick for a character, since that can make me hard to find if I'm
+switching roles. Instead, I wanted an easy way to prepend my character's name
+to my messages for certain channels.
+
+Hacking
+-------
+
+SwitchMask is [free software][1], released under the terms of version 3 of the
+GNU Affero General Public License. You are free to copy, modify, and use this
+software for any purpose.
