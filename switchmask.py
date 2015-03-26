@@ -23,14 +23,25 @@ __module_author__ = "David McMackins II"
 import hexchat
 
 masks = {}
+ready = True
 
-def add_mask(name):
-    pass
+def add_mask(word, word_eol, userdata):
+    channel = hexchat.get_info("channel")
+    masks[channel] = word[1]
+    hexchat.prnt("Mask set to " + word[1] + " for channel " + channel)
+    return hexchat.EAT_ALL
 
-def remove_mask():
+def remove_mask(word, word_eol, userdata):
+    channel = hexchat.get_info("channel")
+    del masks[channel]
+    hexchat.prnt("Removed mask for " + channel)
+    return hexchat.EAT_ALL
+
+def msg_hook(word, word_eol, userdata):
     pass
 
 def init():
-    pass
+    hexchat.hook_command("mask", add_mask)
+    hexchat.hook_command("unmask", remove_mask)
 
 init()
