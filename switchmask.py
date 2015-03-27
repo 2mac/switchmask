@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = "SwitchMask"
-__module_version__ = "1.0"
+__module_version__ = "1.1"
 __module_description__ = "Roleplaying nick switcher"
 __module_author__ = "David McMackins II"
 
@@ -25,22 +25,32 @@ import hexchat
 masks = {}
 
 def add_mask(word, word_eol, userdata):
+    network = hexchat.get_info("network")
     channel = hexchat.get_info("channel")
-    masks[channel] = word_eol[1]
-    hexchat.prnt("Mask set to \"" + word_eol[1] + "\" for channel " + channel)
+    combo = "{}:{}".format(network, channel)
+
+    masks[combo] = word_eol[1]
+    hexchat.prnt("Mask set to \"{}\" for channel {}".format(word_eol[1],
+                                                               combo))
+
     return hexchat.EAT_ALL
 
 def remove_mask(word, word_eol, userdata):
+    network = hexchat.get_info("network")
     channel = hexchat.get_info("channel")
-    del masks[channel]
-    hexchat.prnt("Removed mask for " + channel)
+    combo = "{}:{}".format(network, channel)
+
+    del masks[combo]
+    hexchat.prnt("Removed mask for {}".format(combo))
     return hexchat.EAT_ALL
 
 def msg_hook(word, word_eol, userdata):
+    network = hexchat.get_info("network")
     channel = hexchat.get_info("channel")
+    combo = "{}:{}".format(network, channel)
 
     try:
-        msg = "<{}> {}".format(masks[channel], word_eol[0])
+        msg = "<{}> {}".format(masks[combo], word_eol[0])
     except KeyError:
         msg = word_eol[0]
 
