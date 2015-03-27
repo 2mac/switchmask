@@ -11,6 +11,18 @@ changing my nick for a character, since that can make me hard to find if I'm
 switching roles. Instead, I wanted an easy way to prepend my character's name
 to my messages for certain channels.
 
+How?
+----
+
+Masks are stored on a per-channel basis. To set the mask for the current
+channel, use:
+
+    /mask Herp
+
+To remove the mask for the current channel, use:
+
+    /unmask
+
 Hacking
 -------
 
