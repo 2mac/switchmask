@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = "SwitchMask"
-__module_version__ = "0.0"
+__module_version__ = "1.0"
 __module_description__ = "Roleplaying nick switcher"
 __module_author__ = "David McMackins II"
 
@@ -26,8 +26,8 @@ masks = {}
 
 def add_mask(word, word_eol, userdata):
     channel = hexchat.get_info("channel")
-    masks[channel] = word[1]
-    hexchat.prnt("Mask set to " + word[1] + " for channel " + channel)
+    masks[channel] = word_eol[1]
+    hexchat.prnt("Mask set to \"" + word_eol[1] + "\" for channel " + channel)
     return hexchat.EAT_ALL
 
 def remove_mask(word, word_eol, userdata):
