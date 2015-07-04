@@ -52,6 +52,9 @@ def remove_mask(word, word_eol, userdata):
 
     return hexchat.EAT_ALL
 
+def send(msg):
+    hexchat.command('MSG {} {}'.format(hexchat.get_info('channel'), msg))
+
 def msg_hook(word, word_eol, userdata):
     combo = get_combo()
 
@@ -60,14 +63,11 @@ def msg_hook(word, word_eol, userdata):
     except KeyError:
         msg = word_eol[0]
 
-    hexchat.command('MSG {} {}'.format(channel, msg))
+    send(msg)
     return hexchat.EAT_ALL
 
 def unmasked_message(word, word_eol, userdata):
-    channel = hexchat.get_info('channel')
-    msg = word_eol[1]
-
-    hexchat.command('MSG {} {}'.format(channel, msg))
+    send(word_eol[1])
     return hexchat.EAT_ALL
 
 def unload(userdata):
