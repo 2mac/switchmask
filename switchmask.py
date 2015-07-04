@@ -15,27 +15,27 @@
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-__module_name__ = "SwitchMask"
-__module_version__ = "1.2.1"
-__module_description__ = "Roleplaying nick switcher"
-__module_author__ = "David McMackins II"
+__module_name__ = 'SwitchMask'
+__module_version__ = '1.2.1'
+__module_description__ = 'Roleplaying nick switcher'
+__module_author__ = 'David McMackins II'
 
 import hexchat
 
 masks = {}
 
 def get_combo():
-    network = hexchat.get_info("network")
-    channel = hexchat.get_info("channel")
-    return "{}:{}".format(network, channel)
+    network = hexchat.get_info('network')
+    channel = hexchat.get_info('channel')
+    return '{}:{}'.format(network, channel)
 
 def add_mask(word, word_eol, userdata):
     combo = get_combo()
 
     try:
         masks[combo] = word_eol[1]
-        hexchat.prnt("Mask set to \"{}\" for channel {}".format(word_eol[1],
-                                                                combo))
+        hexchat.prnt('Mask set to "{}" for channel {}'.format(word_eol[1],
+                                                              combo))
     except IndexError:
         remove_mask(None, None, None)
 
@@ -46,7 +46,7 @@ def remove_mask(word, word_eol, userdata):
 
     try:
         del masks[combo]
-        hexchat.prnt("Removed mask for {}".format(combo))
+        hexchat.prnt('Removed mask for {}'.format(combo))
     except KeyError:
         pass
 
@@ -56,29 +56,29 @@ def msg_hook(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        msg = "<{}> {}".format(masks[combo], word_eol[0])
+        msg = '<{}> {}'.format(masks[combo], word_eol[0])
     except KeyError:
         msg = word_eol[0]
 
-    hexchat.command("MSG {} {}".format(channel, msg))
+    hexchat.command('MSG {} {}'.format(channel, msg))
     return hexchat.EAT_ALL
 
 def unmasked_message(word, word_eol, userdata):
-    channel = hexchat.get_info("channel")
+    channel = hexchat.get_info('channel')
     msg = word_eol[1]
 
-    hexchat.command("MSG {} {}".format(channel, msg))
+    hexchat.command('MSG {} {}'.format(channel, msg))
     return hexchat.EAT_ALL
 
 def unload(userdata):
-    hexchat.prnt("{} unloaded".format(__module_name__))
+    hexchat.prnt('{} unloaded'.format(__module_name__))
 
 def init():
-    hexchat.hook_command("mask", add_mask)
-    hexchat.hook_command("unmask", remove_mask)
-    hexchat.hook_command("unmasked", unmasked_message)
-    hexchat.hook_command("", msg_hook)
+    hexchat.hook_command('mask', add_mask)
+    hexchat.hook_command('unmask', remove_mask)
+    hexchat.hook_command('unmasked', unmasked_message)
+    hexchat.hook_command('', msg_hook)
     hexchat.hook_unload(unload)
-    hexchat.prnt("Loaded {} {}".format(__module_name__, __module_version__))
+    hexchat.prnt('Loaded {} {}'.format(__module_name__, __module_version__))
 
 init()
