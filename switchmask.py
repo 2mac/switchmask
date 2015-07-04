@@ -24,10 +24,13 @@ import hexchat
 
 masks = {}
 
-def add_mask(word, word_eol, userdata):
+def get_combo():
     network = hexchat.get_info("network")
     channel = hexchat.get_info("channel")
-    combo = "{}:{}".format(network, channel)
+    return "{}:{}".format(network, channel)
+
+def add_mask(word, word_eol, userdata):
+    combo = get_combo()
 
     try:
         masks[combo] = word_eol[1]
@@ -39,9 +42,7 @@ def add_mask(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def remove_mask(word, word_eol, userdata):
-    network = hexchat.get_info("network")
-    channel = hexchat.get_info("channel")
-    combo = "{}:{}".format(network, channel)
+    combo = get_combo()
 
     try:
         del masks[combo]
@@ -52,9 +53,7 @@ def remove_mask(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def msg_hook(word, word_eol, userdata):
-    network = hexchat.get_info("network")
-    channel = hexchat.get_info("channel")
-    combo = "{}:{}".format(network, channel)
+    combo = get_combo()
 
     try:
         msg = "<{}> {}".format(masks[combo], word_eol[0])
