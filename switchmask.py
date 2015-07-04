@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = "SwitchMask"
-__module_version__ = "1.2"
+__module_version__ = "1.2.1"
 __module_description__ = "Roleplaying nick switcher"
 __module_author__ = "David McMackins II"
 
