@@ -40,7 +40,7 @@ def add_mask(word, word_eol, userdata):
         try:
             hexchat.prnt('Mask for channel {} is "{}"'.format(combo,
                                                               masks[combo]))
-        except IndexError:
+        except KeyError:
             hexchat.prnt('No mask set for channel {}'.format(combo))
 
     return hexchat.EAT_ALL
