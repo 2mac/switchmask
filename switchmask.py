@@ -16,8 +16,8 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '1.2.1'
-__module_description__ = 'Roleplaying nick switcher'
+__module_version__ = '2.0'
+__module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
 import hexchat
@@ -37,7 +37,11 @@ def add_mask(word, word_eol, userdata):
         hexchat.prnt('Mask set to "{}" for channel {}'.format(word_eol[1],
                                                               combo))
     except IndexError:
-        remove_mask(None, None, None)
+        try:
+            hexchat.prnt('Mask for channel {} is "{}"'.format(combo,
+                                                              masks[combo]))
+        except IndexError:
+            hexchat.prnt('No mask set for channel {}'.format(combo))
 
     return hexchat.EAT_ALL
 
