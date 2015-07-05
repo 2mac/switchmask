@@ -23,11 +23,18 @@ To remove the mask for the current channel, use:
 
     /unmask
 
+Using `/mask` without an argument will show the mask for the current channel.
+
+You may also send a message "unmasked" (without the mask prefix) by prefixing
+your message with `/unmasked`, as in:
+
+    /unmasked Hello!
+
 Hacking
 -------
 
 SwitchMask is [free software][1], released under the terms of version 3 of the
 GNU Affero General Public License. You are free to copy, modify, and use this
-software for any purpose.
+software for any purpose. See [COPYING](COPYING) for more details.
 
 [1]: http://gnu.org/philosophy/free-sw.html
