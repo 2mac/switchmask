@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '2.0'
+__module_version__ = '2.1'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -63,7 +63,7 @@ def msg_hook(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        msg = '<{}> {}'.format(masks[combo], word_eol[0])
+        msg = '<\x02{}\x02> {}'.format(masks[combo], word_eol[0])
     except KeyError:
         msg = word_eol[0]
 
