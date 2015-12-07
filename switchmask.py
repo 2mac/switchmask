@@ -16,14 +16,18 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '2.1'
+__module_version__ = '3.0'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
 import hexchat
 
-_COLOR_CODE = '\x03'
+BOLD = '\x02'
+COLOR = '\x03'
+GRAY_COLOR = '14'
 
+color_messages = True
+colors = {}
 masks = {}
 
 def get_combo():
@@ -46,12 +50,13 @@ def add_mask(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        text = word_eol[1]
-        color = get_color(text)
-        mask = color + text
+        mask = word_eol[1]
+
+        if color_messages:
+            colors[mask] = get_color(mask)
 
         masks[combo] = mask
-        hexchat.prnt('Mask set to "{}" for channel {}'.format(text, combo))
+        hexchat.prnt('Mask set to "{}" for channel {}'.format(mask, combo))
     except IndexError:
         try:
             hexchat.prnt('Mask for channel {} is "{}"'.format(combo,
@@ -75,13 +80,41 @@ def remove_mask(word, word_eol, userdata):
 def send(msg):
     hexchat.command('MSG {} {}'.format(hexchat.get_info('channel'), msg))
 
+def format_payload(mask_color, text):
+    color = mask_color
+    payload = COLOR + color # reset color before building
+    for c in text:
+        if c == '"':
+            if color == mask_color:
+                color = GRAY_COLOR
+                payload += COLOR + color
+                payload += c
+            else:
+                payload += c
+                color = mask_color
+                payload += COLOR + color
+        else:
+            payload += c
+
+    return payload + COLOR # reset color after building
+
 def msg_hook(word, word_eol, userdata):
     combo = get_combo()
+    payload = word_eol[0]
 
     try:
-        msg = '<\x02\x03{}\x03\x02> {}'.format(masks[combo], word_eol[0])
+        mask = masks[combo]
+
+        if color_messages:
+            mask_color = get_color(mask)
+            payload = format_payload(mask_color, payload)
+            mask = COLOR + COLOR + '<' + BOLD + COLOR + mask_color + mask + COLOR + BOLD + '>'
+        else:
+            mask = '<' + mask + '>'
+
+        msg = '{} {}'.format(mask, payload)
     except KeyError:
-        msg = word_eol[0]
+        msg = payload
 
     send(msg)
     return hexchat.EAT_ALL
