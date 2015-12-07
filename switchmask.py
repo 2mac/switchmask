@@ -22,6 +22,8 @@ __module_author__ = 'David McMackins II'
 
 import hexchat
 
+_COLOR_CODE = '\x03'
+
 masks = {}
 
 def get_combo():
@@ -29,13 +31,27 @@ def get_combo():
     channel = hexchat.get_info('channel')
     return '{}:{}'.format(network, channel)
 
+def get_color(text):
+    color = 2
+
+    for c in text:
+        color += ord(c)
+        while color > 13:
+            color -= 12
+
+    code = format(color, '02d')
+    return code
+
 def add_mask(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        masks[combo] = word_eol[1]
-        hexchat.prnt('Mask set to "{}" for channel {}'.format(word_eol[1],
-                                                              combo))
+        text = word_eol[1]
+        color = get_color(text)
+        mask = color + text
+
+        masks[combo] = mask
+        hexchat.prnt('Mask set to "{}" for channel {}'.format(text, combo))
     except IndexError:
         try:
             hexchat.prnt('Mask for channel {} is "{}"'.format(combo,
@@ -63,7 +79,7 @@ def msg_hook(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        msg = '<\x02{}\x02> {}'.format(masks[combo], word_eol[0])
+        msg = '<\x02\x03{}\x03\x02> {}'.format(masks[combo], word_eol[0])
     except KeyError:
         msg = word_eol[0]
 
