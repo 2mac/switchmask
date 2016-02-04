@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.1'
+__module_version__ = '3.1.1'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -170,6 +170,8 @@ def reset_mask_color(word, word_eol, userdata):
     combo = get_combo()
     del color_overrides[combo]
     hexchat.prnt('Color for {} has been reset'.format(combo))
+
+    return hexchat.EAT_ALL
 
 def unmasked_message(word, word_eol, userdata):
     send(word_eol[1])
