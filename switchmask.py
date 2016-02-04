@@ -1,6 +1,6 @@
 ##
 ##  SwitchMask - Manage your identity.
-##  Copyright (C) 2015 David McMackins II
+##  Copyright (C) 2015-2016 David McMackins II
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.0'
+__module_version__ = '3.1'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -26,9 +26,39 @@ BOLD = '\x02'
 COLOR = '\x03'
 GRAY_COLOR = '14'
 
+COLOR_NAMES = (
+    'white',
+    'black',
+    'navy',
+    'green',
+    'red',
+    'maroon',
+    'purple',
+    'orange',
+    'yellow',
+    'lightgreen',
+    'teal',
+    'cyan',
+    'blue',
+    'magenta',
+    'gray',
+    'lightgray'
+)
+
 color_messages = True
+color_overrides = {}
 colors = {}
 masks = {}
+
+def color_name_lookup(name):
+    return format(COLOR_NAMES.index(name), '02d')
+
+def get_color_demo():
+    s = ''
+    for name in COLOR_NAMES:
+        s += COLOR + color_name_lookup(name) + name + ' '
+
+    return s.rstrip()
 
 def get_combo():
     network = hexchat.get_info('network')
@@ -52,10 +82,8 @@ def add_mask(word, word_eol, userdata):
     try:
         mask = word_eol[1]
 
-        if color_messages:
-            colors[mask] = get_color(mask)
-
         masks[combo] = mask
+        colors[combo] = get_color(mask)
         hexchat.prnt('Mask set to "{}" for channel {}'.format(mask, combo))
     except IndexError:
         try:
@@ -106,7 +134,11 @@ def msg_hook(word, word_eol, userdata):
         mask = masks[combo]
 
         if color_messages:
-            mask_color = get_color(mask)
+            try:
+                mask_color = color_overrides[combo]
+            except KeyError:
+                mask_color = colors[combo]
+
             payload = format_payload(mask_color, payload)
             mask = COLOR + COLOR + '<' + BOLD + COLOR + mask_color + mask + COLOR + BOLD + '>'
         else:
@@ -119,6 +151,26 @@ def msg_hook(word, word_eol, userdata):
     send(msg)
     return hexchat.EAT_ALL
 
+def override_mask_color(word, word_eol, userdata):
+    color_name = word_eol[1].strip()
+
+    try:
+        color = color_name_lookup(color_name)
+        combo = get_combo()
+        color_overrides[combo] = color
+        hexchat.prnt('Color for ' + combo + ' set to ' + COLOR + color
+                     + color_name + COLOR)
+    except ValueError:
+        hexchat.prnt(color_name + ' is not a known color.')
+        hexchat.prnt('Try: ' + get_color_demo())
+
+    return hexchat.EAT_ALL
+
+def reset_mask_color(word, word_eol, userdata):
+    combo = get_combo()
+    del color_overrides[combo]
+    hexchat.prnt('Color for {} has been reset'.format(combo))
+
 def unmasked_message(word, word_eol, userdata):
     send(word_eol[1])
     return hexchat.EAT_ALL
@@ -128,6 +180,8 @@ def unload(userdata):
 
 def init():
     hexchat.hook_command('mask', add_mask)
+    hexchat.hook_command('maskcolor', override_mask_color)
+    hexchat.hook_command('resetmaskcolor', reset_mask_color)
     hexchat.hook_command('unmask', remove_mask)
     hexchat.hook_command('unmasked', unmasked_message)
     hexchat.hook_command('', msg_hook)
