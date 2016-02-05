@@ -16,7 +16,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.1.3'
+__module_version__ = '3.2'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -53,12 +53,10 @@ masks = {}
 def color_name_lookup(name):
     return format(COLOR_NAMES.index(name), '02d')
 
-def get_color_demo():
-    s = ''
-    for name in COLOR_NAMES:
-        s += COLOR + color_name_lookup(name) + name + ' '
-
-    return s.rstrip()
+COLOR_DEMO = ''
+for name in COLOR_NAMES:
+    COLOR_DEMO += COLOR + color_name_lookup(name) + name + ' '
+COLOR_DEMO = COLOR_DEMO.rstrip()
 
 def get_combo():
     network = hexchat.get_info('network')
@@ -162,7 +160,7 @@ def override_mask_color(word, word_eol, userdata):
                      + color_name + COLOR)
     except ValueError:
         hexchat.prnt(color_name + ' is not a known color.')
-        hexchat.prnt('Try: ' + get_color_demo())
+        hexchat.prnt('Try: ' + COLOR_DEMO)
 
     return hexchat.EAT_ALL
 
@@ -187,11 +185,23 @@ def unload(userdata):
     hexchat.prnt('{} unloaded'.format(__module_name__))
 
 def init():
-    hexchat.hook_command('mask', add_mask)
-    hexchat.hook_command('maskcolor', override_mask_color)
-    hexchat.hook_command('resetmaskcolor', reset_mask_color)
-    hexchat.hook_command('unmask', remove_mask)
-    hexchat.hook_command('unmasked', unmasked_message)
+    hexchat.hook_command('mask', add_mask,
+                         help='Usage: MASK <name>, sets mask for this channel')
+
+    hexchat.hook_command('maskcolor', override_mask_color,
+                         help='Usage: MASKCOLOR <color>, sets mask color to '
+                         + 'one of ' + COLOR_DEMO)
+
+    hexchat.hook_command('resetmaskcolor', reset_mask_color,
+                         help='Resets mask color for this channel')
+
+    hexchat.hook_command('unmask', remove_mask,
+                         help='Removes mask for this channel')
+
+    hexchat.hook_command('unmasked', unmasked_message,
+                         help='Usage: UNMASKED <message>, sends message '
+                         + 'without mask')
+
     hexchat.hook_command('', msg_hook)
     hexchat.hook_unload(unload)
     hexchat.prnt('Loaded {} {}'.format(__module_name__, __module_version__))
