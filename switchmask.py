@@ -25,6 +25,7 @@ import hexchat
 BOLD = '\x02'
 COLOR = '\x03'
 GRAY_COLOR = '14'
+MSG_LEN = 466
 
 COLOR_NAMES = (
     'white',
@@ -124,6 +125,25 @@ def format_payload(mask_color, text):
 
     return payload + COLOR # reset color after building
 
+def recolor_msg(msg):
+    parts = msg.split()
+    last_color = COLOR
+    size = 0
+    out = ''
+    for part in parts:
+        if size + len(part) + 3 >= MSG_LEN:
+            part = COLOR + last_color + part
+            size = 0
+
+        if COLOR in part:
+            i = len(part) - part[::-1].index(COLOR) - 1
+            last_color = part[i+1:i+3]
+
+        out += part + ' '
+        size += len(part) + 1
+
+    return out.rstrip()
+
 def msg_hook(word, word_eol, userdata):
     combo = get_combo()
     payload = word_eol[0]
@@ -143,6 +163,7 @@ def msg_hook(word, word_eol, userdata):
             mask = '<' + mask + '>'
 
         msg = '{} {}'.format(mask, payload)
+        msg = recolor_msg(msg)
     except KeyError:
         msg = payload
 
