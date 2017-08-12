@@ -33,8 +33,7 @@ your message with `/unmasked`, as in:
 Hacking
 -------
 
-SwitchMask is [free software][1], released under the terms of version 3 of the
-GNU Affero General Public License. You are free to copy, modify, and use this
+SwitchMask is [free software][1]. You are free to copy, modify, and use this
 software for any purpose. See [COPYING](COPYING) for more details.
 
 [1]: http://gnu.org/philosophy/free-sw.html
