@@ -37,7 +37,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '4.0'
+__module_version__ = '3.2.1'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
