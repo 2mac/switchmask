@@ -1,22 +1,43 @@
 ##
-##  SwitchMask - Manage your identity.
-##  Copyright (C) 2015-2016 David McMackins II
+## SwitchMask - Manage your identity.
+## Copyright (C) 2015-2017 David McMackins II
 ##
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU Affero General Public License as published by
-##  the Free Software Foundation, version 3 only.
+## Redistributions, modified or unmodified, in whole or in part, must retain
+## applicable copyright or other legal privilege notices, these conditions, and
+## the following license terms and disclaimer.  Subject to these conditions,
+## the holder(s) of copyright or other legal privileges, author(s) or
+## assembler(s), and contributors of this work hereby grant to any person who
+## obtains a copy of this work in any form:
 ##
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##  GNU Affero General Public License for more details.
+## 1. Permission to reproduce, modify, distribute, publish, sell, sublicense,
+## use, and/or otherwise deal in the licensed material without restriction.
 ##
-##  You should have received a copy of the GNU Affero General Public License
-##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## 2. A perpetual, worldwide, non-exclusive, royalty-free, irrevocable patent
+## license to reproduce, modify, distribute, publish, sell, use, and/or
+## otherwise deal in the licensed material without restriction, for any and all
+## patents:
+##
+##     a. Held by each such holder of copyright or other legal privilege,
+##     author or assembler, or contributor, necessarily infringed by the
+##     contributions alone or by combination with the work, of that privilege
+##     holder, author or assembler, or contributor.
+##
+##     b. Necessarily infringed by the work at the time that holder of
+##     copyright or other privilege, author or assembler, or contributor made
+##     any contribution to the work.
+##
+## NO WARRANTY OF ANY KIND IS IMPLIED BY, OR SHOULD BE INFERRED FROM, THIS
+## LICENSE OR THE ACT OF DISTRIBUTION UNDER THE TERMS OF THIS LICENSE,
+## INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR
+## A PARTICULAR PURPOSE, AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS,
+## ASSEMBLERS, OR HOLDERS OF COPYRIGHT OR OTHER LEGAL PRIVILEGE BE LIABLE FOR
+## ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT,
+## OR OTHERWISE ARISING FROM, OUT OF, OR IN CONNECTION WITH THE WORK OR THE USE
+## OF OR OTHER DEALINGS IN THE WORK.
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.2'
+__module_version__ = '4.0'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -148,29 +169,36 @@ def msg_hook(word, word_eol, userdata):
     combo = get_combo()
     payload = word_eol[0]
 
-    try:
-        mask = masks[combo]
+    if combo not in masks:
+        return hexchat.EAT_NONE
 
-        if color_messages:
-            try:
-                mask_color = color_overrides[combo]
-            except KeyError:
-                mask_color = colors[combo]
+    mask = masks[combo]
 
-            payload = format_payload(mask_color, payload)
-            mask = COLOR + COLOR + '<' + BOLD + COLOR + mask_color + mask + COLOR + BOLD + '>'
+    if color_messages:
+        if combo in color_overrides:
+            mask_color = color_overrides[combo]
         else:
-            mask = '<' + mask + '>'
+            mask_color = colors[combo]
 
-        msg = '{} {}'.format(mask, payload)
+        payload = format_payload(mask_color, payload)
+        mask = COLOR + COLOR + '<' + BOLD + COLOR + mask_color + mask + COLOR + BOLD + '>'
+    else:
+        mask = '<' + mask + '>'
+
+    msg = '{} {}'.format(mask, payload)
+
+    if color_messages:
         msg = recolor_msg(msg)
-    except KeyError:
-        msg = payload
 
     send(msg)
     return hexchat.EAT_ALL
 
 def override_mask_color(word, word_eol, userdata):
+    if len(word_eol) != 2:
+        hexchat.prnt('USAGE: /' + word[0] + ' <color>')
+        hexchat.prnt('Colors: ' + COLOR_DEMO)
+        return hexchat.EAT_ALL
+
     color_name = word_eol[1].strip()
 
     try:
@@ -195,7 +223,7 @@ def reset_mask_color(word, word_eol, userdata):
 
     hexchat.prnt('Color for {} has been reset'.format(combo))
     return hexchat.EAT_ALL
-
+ 
 def unmasked_message(word, word_eol, userdata):
     if len(word_eol) > 1:
         send(word_eol[1])
@@ -218,7 +246,7 @@ def init():
 
     hexchat.hook_command('unmask', remove_mask,
                          help='Removes mask for this channel')
-
+ 
     hexchat.hook_command('unmasked', unmasked_message,
                          help='Usage: UNMASKED <message>, sends message '
                          + 'without mask')
