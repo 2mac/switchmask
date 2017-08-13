@@ -37,7 +37,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.3'
+__module_version__ = '3.3.1'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -212,8 +212,9 @@ def recolor_msg(msg):
     msg_len = get_msg_len()
     out = ''
     for part in parts:
+        new_part = part
         if size + len(part) + len(properties) >= msg_len:
-            part = str(properties) + part
+            new_part = str(properties) + part
             size = 0
 
         if COLOR in part:
@@ -226,8 +227,8 @@ def recolor_msg(msg):
         for _ in range(part.count(ITALIC)):
             properties.italic = not properties.italic
 
-        out += part + ' '
-        size += len(part) + 1
+        out += new_part + ' '
+        size += len(new_part) + 1
 
     return out.rstrip()
 
