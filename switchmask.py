@@ -37,11 +37,14 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.2.3'
+__module_version__ = '3.3'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
 import hexchat
+
+from os.path import exists
+from pickle import dump, load
 
 BOLD = '\x02'
 ITALIC = '\x1D'
@@ -90,10 +93,22 @@ class TextProperties:
     def __len__(self):
         return len(str(self))
 
-color_messages = True
-color_overrides = {}
-colors = {}
-masks = {}
+class UserPrefs:
+    def __init__(self):
+        self.color_messages = True
+        self.color_overrides = {}
+        self.masks = {}
+        self.colors = {}
+
+PREFS = UserPrefs()
+
+STATE_FILE_PATH = '{}/switchmask.state'.format(hexchat.get_info('configdir'))
+try:
+    if exists(STATE_FILE_PATH):
+        with open(STATE_FILE_PATH, 'rb') as f:
+            PREFS = load(f)
+except Exception as e:
+    hexchat.prnt(str(e))
 
 def color_name_lookup(name):
     return format(COLOR_NAMES.index(name), '02d')
@@ -125,13 +140,13 @@ def add_mask(word, word_eol, userdata):
     try:
         mask = word_eol[1]
 
-        masks[combo] = mask
-        colors[combo] = get_color(mask)
+        PREFS.masks[combo] = mask
+        PREFS.colors[combo] = get_color(mask)
         hexchat.prnt('Mask set to "{}" for channel {}'.format(mask, combo))
     except IndexError:
         try:
             hexchat.prnt('Mask for channel {} is "{}"'.format(combo,
-                                                              masks[combo]))
+                                                              PREFS.masks[combo]))
         except KeyError:
             hexchat.prnt('No mask set for channel {}'.format(combo))
 
@@ -141,7 +156,7 @@ def remove_mask(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        del masks[combo]
+        del PREFS.masks[combo]
         hexchat.prnt('Removed mask for {}'.format(combo))
     except KeyError:
         pass
@@ -220,16 +235,16 @@ def msg_hook(word, word_eol, userdata):
     combo = get_combo()
     payload = word_eol[0]
 
-    if combo not in masks:
+    if combo not in PREFS.masks:
         return hexchat.EAT_NONE
 
-    mask = masks[combo]
+    mask = PREFS.masks[combo]
 
-    if color_messages:
-        if combo in color_overrides:
-            mask_color = color_overrides[combo]
+    if PREFS.color_messages:
+        if combo in PREFS.color_overrides:
+            mask_color = PREFS.color_overrides[combo]
         else:
-            mask_color = colors[combo]
+            mask_color = PREFS.colors[combo]
 
         payload = format_payload(mask_color, payload)
         mask = COLOR + COLOR + '<' + BOLD + COLOR + mask_color + mask + COLOR + BOLD + '>'
@@ -238,7 +253,7 @@ def msg_hook(word, word_eol, userdata):
 
     msg = '{} {}'.format(mask, payload)
 
-    if color_messages:
+    if PREFS.color_messages:
         msg = recolor_msg(msg)
 
     send(msg)
@@ -255,7 +270,7 @@ def override_mask_color(word, word_eol, userdata):
     try:
         color = color_name_lookup(color_name)
         combo = get_combo()
-        color_overrides[combo] = color
+        PREFS.color_overrides[combo] = color
         hexchat.prnt('Color for ' + combo + ' set to ' + COLOR + color
                      + color_name + COLOR)
     except ValueError:
@@ -268,12 +283,15 @@ def reset_mask_color(word, word_eol, userdata):
     combo = get_combo()
 
     try:
-        del color_overrides[combo]
+        del PREFS.color_overrides[combo]
     except KeyError:
         pass
 
     hexchat.prnt('Color for {} has been reset'.format(combo))
     return hexchat.EAT_ALL
+
+def toggle_mask_colors(word, word_eol, userdata):
+    PREFS.color_messages = not PREFS.color_messages
  
 def unmasked_message(word, word_eol, userdata):
     if len(word_eol) > 1:
@@ -282,6 +300,12 @@ def unmasked_message(word, word_eol, userdata):
     return hexchat.EAT_ALL
 
 def unload(userdata):
+    try:
+        with open(STATE_FILE_PATH, 'wb') as f:
+            dump(PREFS, f)
+    except Exception as e:
+        hexchat.prnt(str(e))
+
     hexchat.prnt('{} unloaded'.format(__module_name__))
 
 def init():
@@ -294,6 +318,9 @@ def init():
 
     hexchat.hook_command('resetmaskcolor', reset_mask_color,
                          help='Resets mask color for this channel')
+
+    hexchat.hook_command('togglemaskcolors', toggle_mask_colors,
+                         help='Toggles mask colors in chat')
 
     hexchat.hook_command('unmask', remove_mask,
                          help='Removes mask for this channel')
