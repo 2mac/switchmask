@@ -137,29 +137,29 @@ def get_color(text):
 def add_mask(word, word_eol, userdata):
     combo = get_combo()
 
-    try:
-        mask = word_eol[1]
+    if len(word_eol) < 2:
+        if combo in PREFS.masks:
+            hexchat.prnt('Mask for {} is "{}"'.format(combo,
+                                                      PREFS.masks[combo]))
+        else:
+            hexchat.prnt('No mask set for {}'.format(combo))
 
-        PREFS.masks[combo] = mask
-        PREFS.colors[combo] = get_color(mask)
-        hexchat.prnt('Mask set to "{}" for channel {}'.format(mask, combo))
-    except IndexError:
-        try:
-            hexchat.prnt('Mask for channel {} is "{}"'.format(combo,
-                                                              PREFS.masks[combo]))
-        except KeyError:
-            hexchat.prnt('No mask set for channel {}'.format(combo))
+        return hexchat.EAT_ALL
+
+    mask = word_eol[1]
+
+    PREFS.masks[combo] = mask
+    PREFS.colors[combo] = get_color(mask)
+    hexchat.prnt('Mask set to "{}" for {}'.format(mask, combo))
 
     return hexchat.EAT_ALL
 
 def remove_mask(word, word_eol, userdata):
     combo = get_combo()
 
-    try:
+    if combo in PREFS.masks:
         del PREFS.masks[combo]
         hexchat.prnt('Removed mask for {}'.format(combo))
-    except KeyError:
-        pass
 
     return hexchat.EAT_ALL
 
@@ -267,13 +267,13 @@ def override_mask_color(word, word_eol, userdata):
 
     color_name = word_eol[1].strip()
 
-    try:
+    if color_name in COLOR_NAMES:
         color = color_name_lookup(color_name)
         combo = get_combo()
         PREFS.color_overrides[combo] = color
         hexchat.prnt('Color for ' + combo + ' set to ' + COLOR + color
                      + color_name + COLOR)
-    except ValueError:
+    else:
         hexchat.prnt(color_name + ' is not a known color.')
         hexchat.prnt('Try: ' + COLOR_DEMO)
 
@@ -282,12 +282,10 @@ def override_mask_color(word, word_eol, userdata):
 def reset_mask_color(word, word_eol, userdata):
     combo = get_combo()
 
-    try:
+    if combo in PREFS.color_overrides:
         del PREFS.color_overrides[combo]
-    except KeyError:
-        pass
+        hexchat.prnt('Color for {} has been reset'.format(combo))
 
-    hexchat.prnt('Color for {} has been reset'.format(combo))
     return hexchat.EAT_ALL
 
 def toggle_mask_colors(word, word_eol, userdata):
