@@ -37,7 +37,7 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.2.1'
+__module_version__ = '3.2.2'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
@@ -46,7 +46,6 @@ import hexchat
 BOLD = '\x02'
 COLOR = '\x03'
 GRAY_COLOR = '14'
-MSG_LEN = 466
 
 COLOR_NAMES = (
     'white',
@@ -146,13 +145,35 @@ def format_payload(mask_color, text):
 
     return payload + COLOR # reset color after building
 
+def get_msg_len():
+    n = 512 # IRC RFC 2812
+    n -= 3 # hexchat does this
+    n -= 13 # command length
+    nick = hexchat.get_info('nick')
+    n -= len(nick)
+    n -= len(hexchat.get_info('channel'))
+
+    users = hexchat.get_list('users')
+    for user in users:
+        if user.nick == nick:
+            if user.host:
+                n -= len(user.host)
+            else:
+                n -= 9
+                n -= 65
+
+            break
+
+    return n
+
 def recolor_msg(msg):
-    parts = msg.split()
+    parts = msg.split(' ')
     last_color = COLOR
     size = 0
+    msg_len = get_msg_len()
     out = ''
     for part in parts:
-        if size + len(part) + 3 >= MSG_LEN:
+        if size + len(part) + 3 >= msg_len:
             part = COLOR + last_color + part
             size = 0
 
