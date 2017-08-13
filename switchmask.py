@@ -37,13 +37,14 @@
 ##
 
 __module_name__ = 'SwitchMask'
-__module_version__ = '3.2.2'
+__module_version__ = '3.2.3'
 __module_description__ = 'Roleplaying character name switcher'
 __module_author__ = 'David McMackins II'
 
 import hexchat
 
 BOLD = '\x02'
+ITALIC = '\x1D'
 COLOR = '\x03'
 GRAY_COLOR = '14'
 
@@ -65,6 +66,29 @@ COLOR_NAMES = (
     'gray',
     'lightgray'
 )
+
+class TextProperties:
+    def __init__(self):
+        self.color = ''
+        self.bold = False
+        self.italic = False
+
+    def __str__(self):
+        s = ''
+
+        if self.color:
+            s += COLOR + self.color
+
+        if self.bold:
+            s += BOLD
+
+        if self.italic:
+            s += ITALIC
+
+        return s
+
+    def __len__(self):
+        return len(str(self))
 
 color_messages = True
 color_overrides = {}
@@ -167,19 +191,25 @@ def get_msg_len():
     return n
 
 def recolor_msg(msg):
+    properties = TextProperties()
     parts = msg.split(' ')
-    last_color = COLOR
     size = 0
     msg_len = get_msg_len()
     out = ''
     for part in parts:
-        if size + len(part) + 3 >= msg_len:
-            part = COLOR + last_color + part
+        if size + len(part) + len(properties) >= msg_len:
+            part = str(properties) + part
             size = 0
 
         if COLOR in part:
             i = len(part) - part[::-1].index(COLOR) - 1
-            last_color = part[i+1:i+3]
+            properties.color = part[i+1:i+3]
+
+        for _ in range(part.count(BOLD)):
+            properties.bold = not properties.bold
+
+        for _ in range(part.count(ITALIC)):
+            properties.italic = not properties.italic
 
         out += part + ' '
         size += len(part) + 1
